@@ -1,0 +1,26 @@
+{
+  "id": "https://silvaoo.github.io/shukkin-search-yobi/",
+  "name": "予 - 出退勤検索くん(予備ダイヤ)",
+  "short_name": "予",
+  "description": "予備ダイヤ 出退勤検索くん",
+  "start_url": "https://silvaoo.github.io/shukkin-search-yobi/",
+  "scope": "https://silvaoo.github.io/shukkin-search-yobi/",
+  "display": "standalone",
+  "background_color": "#0e0e1c",
+  "theme_color": "#1a0e2e",
+  "icons": [
+    { "src": "icons/icon-72.png", "sizes": "72x72", "type": "image/png" },
+    { "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "icons/icon-120.png", "sizes": "120x120", "type": "image/png" },
+    { "src": "icons/icon-144.png", "sizes": "144x144", "type": "image/png" },
+    { "src": "icons/icon-152.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "アプリを共有", "short_name": "共有", "description": "このアプリのリンクをLINEなどで共有します", "url": "share.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
