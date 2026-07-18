@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予</title>
 
 <!-- ホーム画面追加時のアイコン・タイトル設定 -->
@@ -586,20 +586,52 @@ input[type="date"] {
   display: none;
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.9);
   z-index: 10000;
-  padding: 20px;
-  overflow-y: auto;
+  padding: 12px;
+  box-sizing: border-box;
 }
-.source-modal.active { display: block; }
+.source-modal.active { display: flex; flex-direction: column; }
 .source-modal-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   max-width: 100%;
   margin: 0 auto;
 }
-.source-modal-content img {
+.source-img-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  background: #fff;
+}
+.source-img-scroll img {
   width: 100%;
+  height: auto;
+  display: block;
   border-radius: 8px;
 }
+.source-zoom-hint {
+  text-align: center;
+  color: #eee;
+  font-size: 13px;
+  margin-top: 10px;
+}
+.source-close {
+  display: block;
+  margin: 10px auto 0;
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 22px;
+  background: #fff;
+  color: #333;
+}
+.source-close:active { background: #ddd; }
 .footer .credit { color: var(--green); font-weight: 700; margin-top: 4px; }
 
 /* ==== 花火・トースト ==== */
@@ -1044,8 +1076,12 @@ input[type="date"] {
 
 <!-- 元データ画像モーダル -->
 <div id="sourceModal" class="source-modal" onclick="closeSourceModal()">
-  <div class="source-modal-content">
-    <img src="images/genpage-1.jpg" alt="予備ダイヤ 出退勤表 1枚目"><img src="images/genpage-2.jpg" alt="予備ダイヤ 出退勤表 2枚目" style="margin-top:10px;">
+  <div class="source-modal-content" onclick="event.stopPropagation()">
+    <div class="source-img-scroll" id="srcScroll">
+      <img id="srcImg" src="images/genpage-1.jpg" alt="予備ダイヤ 出退勤表">
+    </div>
+    <div class="source-zoom-hint">🔍 指を広げて拡大／狭めて縮小。とじるには下の「とじる」ボタン（戻らない時はページを再読み込み）</div>
+    <button class="source-close" onclick="closeSourceModal()">×&nbsp;とじる</button>
   </div>
 </div>
 
@@ -2298,6 +2334,8 @@ function drawFw(){
 /* 元データ画像モーダルの開閉 */
 function openSourceModal(){
   document.getElementById('sourceModal').classList.add('active');
+  var sc=document.getElementById('srcScroll');
+  if(sc){ sc.scrollTop=0; sc.scrollLeft=0; }
 }
 function closeSourceModal(){
   document.getElementById('sourceModal').classList.remove('active');
