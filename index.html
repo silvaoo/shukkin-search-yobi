@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>出退勤検索</title>
+<title>予</title>
 
 <!-- ホーム画面追加時のアイコン・タイトル設定 -->
-<meta name="apple-mobile-web-app-title" content="${APP_CONFIG.shortTitle}">
+<meta name="apple-mobile-web-app-title" content="予">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0e27">
-<link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/silvaoo/shukkin-search/main/icons/icon-180.png">
-<link rel="apple-touch-icon" sizes="152x152" href="https://raw.githubusercontent.com/silvaoo/shukkin-search/main/icons/icon-152.png">
-<link rel="apple-touch-icon" sizes="144x144" href="https://raw.githubusercontent.com/silvaoo/shukkin-search/main/icons/icon-144.png">
-<link rel="apple-touch-icon" sizes="120x120" href="https://raw.githubusercontent.com/silvaoo/shukkin-search/main/icons/icon-120.png">
-<link rel="icon" type="image/png" sizes="192x192" href="https://raw.githubusercontent.com/silvaoo/shukkin-search/main/icons/icon-192.png">
-<link rel="icon" type="image/png" sizes="96x96" href="https://raw.githubusercontent.com/silvaoo/shukkin-search/main/icons/icon-96.png">
-<link rel="manifest" href="https://raw.githubusercontent.com/silvaoo/shukkin-search/main/manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96.png">
+<link rel="manifest" href="manifest.json">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+JP:wght@300;400;700&display=swap');
@@ -26,36 +26,36 @@
   --bg: #08080f;
   --bg-card: #0e0e1c;
   --bg-card2: #13132a;
-  --cyan: #00f5ff;
+  --cyan: #b14fff;
   --pink: #ff0080;
   --purple: #bf00ff;
   --blue: #3b82f6;
   --yellow: #ffe600;
   --green: #00ff88;
-  --orange: #ff8c00;
-  --text: #dde0ff;
+  --orange: #ff2d55;
+  --text: #e6ddff;
   --label: #BA68C8;
   --note: #CE93D8;
   --dim: var(--label);
-  --border: rgba(0,245,255,0.2);
+  --border: rgba(177,79,255,0.25);
 }
 /* ==== ライトモード ==== */
 body.light {
   --bg: #eeeef8;
   --bg-card: #ffffff;
   --bg-card2: #f0f0ff;
-  --cyan: #0077bb;
+  --cyan: #7700cc;
   --pink: #cc0055;
   --purple: #7700cc;
   --blue: #1d4ed8;
   --yellow: #aa7700;
   --green: #007744;
-  --orange: #cc6600;
+  --orange: #cc0033;
   --text: #111133;
   --label: #8E24AA;
   --note: #6A1B9A;
   --dim: var(--label);
-  --border: rgba(0,119,187,0.3);
+  --border: rgba(119,0,204,0.3);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -252,7 +252,7 @@ body {
 .cal-day.sat { color: #2660d9; }
 .cal-day.today { border-color: #ff8c00; border-width: 2px; font-weight: 800; }
 .cal-day.inrange { background: #d8f5e6; }
-.cal-day.edge { background: var(--cyan); color: #04202a; font-weight: 800; }
+.cal-day.edge { background: var(--cyan); color: #1a0e2e; font-weight: 800; }
 
 .cal-sel {
   margin-top: 10px; text-align: center; font-size: 13px; font-weight: 700;
@@ -265,7 +265,7 @@ body {
   font-weight: 800; cursor: pointer; border: 1px solid #d8d8e0;
   background: #f0f0f5; color: var(--label);
 }
-.cal-ok { background: var(--cyan); color: #04202a; border-color: var(--cyan); flex: 1.3; }
+.cal-ok { background: var(--cyan); color: #1a0e2e; border-color: var(--cyan); flex: 1.3; }
 .cal-ok:disabled { opacity: 0.35; cursor: default; }
 
 /* ==== 検索結果カレンダー（番号と出退勤時間を一覧表示） ==== */
@@ -304,7 +304,7 @@ body {
 .rescal-grid .cal-day:active { background: #e8f5ff; }
 .rc-save-btn {
   width: 100%; margin-top: 10px; padding: 12px; border: none; border-radius: 10px;
-  background: #ff8c00; color: #3a2400; font-size: 15px; font-weight: 800;
+  background: #ff2d55; color: #ffffff; font-size: 15px; font-weight: 800;
   cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
 }
 .rc-save-btn:active { transform: scale(0.98); filter: brightness(0.95); }
@@ -361,6 +361,7 @@ body {
   background: #1a1a2e; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer;
 }
 
+
 /* ==== メモ一覧（保存したメモをまとめて見る・直す） ==== */
 
 .memolist-modal {
@@ -381,7 +382,7 @@ body {
   background: var(--bg-card2); color: var(--dim);
   border: 1px solid var(--border); border-radius: 8px;
 }
-.ml-tab.on { background: var(--cyan); color: #04202a; border-color: var(--cyan); }
+.ml-tab.on { background: var(--cyan); color: #1a0e2e; border-color: var(--cyan); }
 .ml-pane { display: none; }
 .ml-pane.on { display: block; }
 .ml-item {
@@ -448,7 +449,7 @@ body {
   background: var(--bg-card2); color: var(--dim);
   border: 1px solid var(--border); border-radius: 8px;
 }
-.guide-tab.on { background: var(--cyan); color: #04202a; border-color: var(--cyan); }
+.guide-tab.on { background: var(--cyan); color: #1a0e2e; border-color: var(--cyan); }
 .guide-pane { display: none; }
 .guide-pane.on { display: block; }
 .guide-step { margin-bottom: 18px; }
@@ -715,16 +716,13 @@ input[type="date"] {
   margin-top: 14px;
   line-height: 1.8;
 }
-.source-link,
-a.source-link:link,
-a.source-link:visited {
+.source-link {
   color: var(--cyan);
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
 }
 .source-modal {
-  overscroll-behavior: contain;   /* モーダル内の引っ張りで画面が再読み込みされるのを防ぐ */
   display: none;
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -743,7 +741,6 @@ a.source-link:visited {
   margin: 0 auto;
 }
 .source-img-scroll {
-  overscroll-behavior: contain;   /* 画像スクロール中のプルリフレッシュ防止 */
   flex: 1;
   min-height: 0;
   overflow: auto;
@@ -759,10 +756,10 @@ a.source-link:visited {
 }
 .source-pdf-btn {
   display: block; margin: 0 auto 10px; padding: 11px 14px; max-width: 520px; width: 100%;
-  background: linear-gradient(135deg, #ff8c00, #ff6a00); color: #fff;
+  background: linear-gradient(135deg, #ff2d55, #d81b45); color: #fff;
   border-radius: 10px; text-align: center; text-decoration: none;
   font-size: 15px; font-weight: 800; line-height: 1.4;
-  box-shadow: 0 3px 10px rgba(255,140,0,0.35);
+  box-shadow: 0 3px 10px rgba(255,45,85,0.35);
 }
 .source-pdf-btn span {
   display: block; margin-top: 3px; font-size: 11px; font-weight: 500; opacity: 0.95;
@@ -786,13 +783,6 @@ a.source-link:visited {
   color: #333;
 }
 .source-close:active { background: #ddd; }
-.source-pdf-link {
-  text-align: center;
-  color: #fff;
-  font-size: 13px;
-  margin-top: 10px;
-}
-.source-pdf-link a { color: #7ec8ff; font-weight: 700; }
 .footer .credit { color: var(--green); font-weight: 700; margin-top: 4px; }
 
 /* ==== 花火・トースト ==== */
@@ -848,7 +838,7 @@ a.source-link:visited {
 .inst-step { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
 .inst-num {
   flex: none; width: 22px; height: 22px; border-radius: 50%;
-  background: var(--cyan); color: #04202a;
+  background: var(--cyan); color: #1a0e2e;
   font-size: 12px; font-weight: 900; margin-top: 1px;
   display: flex; align-items: center; justify-content: center;
 }
@@ -869,7 +859,7 @@ a.source-link:visited {
 .mascot-icon{height:1.4em;width:1.4em;object-fit:cover;border-radius:24%;vertical-align:-0.34em;margin-right:.16em;}
 
 /* ===== 起動スプラッシュ（アイコン＋鹿くん） ===== */
-#launch-splash{position:fixed;inset:0;z-index:99999;background:#0a0e27;
+#launch-splash{position:fixed;inset:0;z-index:99999;background:#0e0e1c;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
   transition:opacity .4s ease;}
 #launch-splash.hide{opacity:0;pointer-events:none;}
@@ -893,9 +883,9 @@ a.source-link:visited {
 <body>
 <div id="ptr-indicator"><div class="ptr-spinner"></div><span class="ptr-text">引っ張って更新</span></div>
 
-<!-- 起動スプラッシュ：OSの「${APP_CONFIG.shortTitle}」アイコン表示に続けて、アイコン＋鹿くんを一瞬見せる。タップで即スキップ -->
+<!-- 起動スプラッシュ：OSの「予」アイコン表示に続けて、アイコン＋鹿くんを一瞬見せる。タップで即スキップ -->
 <div id="launch-splash" onclick="hideLaunchSplash()">
-  <img class="ls-icon" src="icons/icon-192.png" alt="${APP_CONFIG.shortTitle}">
+  <img class="ls-icon" src="icons/icon-192.png" alt="予">
   <img class="ls-mascot" src="mascot.png" alt="出退勤検索くん">
 </div>
 
@@ -908,7 +898,7 @@ a.source-link:visited {
 <div class="header">
   <a href="#" class="share-btn" onclick="shareApp(); return false;" aria-label="アプリを共有">📤</a>
   <h1><img class="mascot-icon" src="mascot.png" alt="出退勤検索くん">出退勤検索くん</h1>
-  <p><span class="dia-name">北大和・学園前 Aダイヤ</span> ／ 2026年3月14日改正 ／ 1〜92番</p>
+  <p><span class="dia-name">予備ダイヤ</span> ／ 2026年3月14日改正 ／ 1〜25番</p>
   <button class="mode-btn" onclick="toggleMode()">🌙/☀️</button>
 </div>
 
@@ -917,10 +907,10 @@ a.source-link:visited {
   <div class="today-clock" id="todayClock">本日は—</div>
   <div class="dial-row">
     <span>今日は</span>
-    <input type="number" id="todayInput" min="1" max="${APP_CONFIG.maxDial}" inputmode="numeric" autocomplete="off">
+    <input type="number" id="todayInput" min="1" max="25" inputmode="numeric" autocomplete="off">
     <span>番ダイヤ</span>
   </div>
-  <div class="today-preview empty" id="todayPreviewBox">↑ 1〜92の番号を入力してください</div>
+  <div class="today-preview empty" id="todayPreviewBox">↑ 1〜25の番号を入力してください</div>
   <div class="today-countdown" id="todayCountdown" style="display:none;"></div>
   <div class="mydial-note" id="myDialNote" style="display:none;">
     ✅ この番号を保存し、明日から自動で1つずつ進みます。
@@ -1090,7 +1080,7 @@ a.source-link:visited {
 
       <div class="guide-step">
         <h3>① ダイヤ番号を入れる</h3>
-        <p>一番上の枠に、今日の自分のダイヤ番号(1〜92)を入れるだけ。すぐ下に今日の勤務が出ます。</p>
+        <p>一番上の枠に、今日の自分のダイヤ番号(1〜25)を入れるだけ。すぐ下に今日の勤務が出ます。</p>
         <img src="images/guide-1.jpg" alt="ダイヤ番号を入力する画面">
         <div class="guide-note">
           <b>次の日からは入れ直さなくてOK。</b>開くだけで、自動で1つ進んだ番号が入っています。<br>
@@ -1194,7 +1184,7 @@ a.source-link:visited {
           右上の<b>「追加」</b>を押したら完成です。
         </div></div>
         <div class="inst-done">
-          ホーム画面に <b>「${APP_CONFIG.shortTitle}」</b> というアイコンができていればOK。次からはそれを押すだけです。<br>
+          ホーム画面に <b>「予」</b> というアイコンができていればOK。次からはそれを押すだけです。<br>
           ※「Safariで開く」が見つからない時は、リンクを長押しして<b>コピー</b>し、Safariのアドレス欄に貼り付けて開いてもOKです。
         </div>
       </div>
@@ -1214,7 +1204,7 @@ a.source-link:visited {
           <b>「追加」</b>や<b>「インストール」</b>を押したら完成です。
         </div></div>
         <div class="inst-done">
-          ホーム画面に <b>「${APP_CONFIG.shortTitle}」</b> というアイコンができていればOK。次からはそれを押すだけです。<br>
+          ホーム画面に <b>「予」</b> というアイコンができていればOK。次からはそれを押すだけです。<br>
           ※ 画面の下に「アプリをインストール」というバーが自動で出ることもあります。その時はそれを押すだけでOKです。
         </div>
       </div>
@@ -1232,10 +1222,6 @@ a.source-link:visited {
       <div class="log-item">
         <div class="log-date">2026/08/11</div>
         <div class="log-body"><span class="tag tag-fix">修正</span>読み上げを止めたときに、エラーの文字が出ることがあったのを直しました。読み上げ中はボタンが「読み上げを停止」に変わります。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/08/08</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>出退勤表をPDFでも見られるようにしました。「コチラ」から開けます。Adobe Readerなどで開くと、好きなだけ大きく拡大できます。</div>
       </div>
       <div class="log-item">
         <div class="log-date">2026/08/08</div>
@@ -1318,8 +1304,8 @@ a.source-link:visited {
         <div class="log-body"><span class="tag tag-new">新機能</span>検索結果にメモ機能を追加(日付ごと・ダイヤ番号ごと、編集・保存・削除)。</div>
       </div>
       <div class="log-item">
-        <div class="log-date">2026/03/14</div>
-        <div class="log-body"><span class="tag tag-new">ダイヤ改正</span>2026年3月14日改正のダイヤに対応しました(1〜92番)。</div>
+        <div class="log-date">2026/07/14</div>
+        <div class="log-body"><span class="tag tag-new">新規</span>予備ダイヤ版を公開しました(1〜25番／2026年3月14日改正)。</div>
       </div>
     </div>
   </div>
@@ -1339,57 +1325,40 @@ a.source-link:visited {
 
 <div id="sourceModal" class="source-modal" onclick="closeSourceModal()">
   <div class="source-modal-content" onclick="event.stopPropagation()">
-    <a class="source-pdf-btn" href="shift-table-a.pdf?v=2" target="_blank" rel="noopener">
-      📄 出退勤表（PDF版）を開く
-      <span>拡大したい時はこちら。共有→Adobe Readerで開くと好きなだけ大きくできます</span>
-    </a>
-    <a class="source-pdf-btn" href="kinmu-keitou-a.pdf" target="_blank" rel="noopener">
-      📄 勤務系統表（全16ページ）を開く
-      <span>系統・行先・中間解放まで載った詳しい表です。拡大しても文字がきれいです</span>
+    <a class="source-pdf-btn" href="kinmu-keitou-yobi.pdf" target="_blank" rel="noopener">
+      📄 勤務系統表（全5ページ）を開く
+      <span>系統・行先・中間解放まで載った詳しい表です</span>
     </a>
     <div class="source-img-scroll" id="srcScroll">
-      <img id="srcImg"
-           src="https://raw.githubusercontent.com/silvaoo/shukkin-search/main/shift_table_hires.jpg"
-           alt="学園前Ａダイヤ 出退勤表">
+      <img id="srcImg" src="images/genpage-1.jpg" alt="予備ダイヤ 出退勤表">
     </div>
-    <div class="source-zoom-hint">🔍 指を広げて拡大／狭めて縮小。とじるには下の「とじる」ボタン</div>
+    <div class="source-zoom-hint">🔍 指を広げて拡大／狭めて縮小。とじるには下の「とじる」ボタン（戻らない時はページを再読み込み）</div>
     <button class="source-close" onclick="closeSourceModal()">×&nbsp;とじる</button>
   </div>
 </div>
-
-
-// ==================== アプリケーション設定 ====================
-// 各ダイヤアプリはこの設定を変更するだけで対応可能
-const APP_CONFIG = {
-  routeName: "学園前A",              // ルート名（画面表示用）
-  shortTitle: "学A",                 // ホーム画面用の短名
-  maxDial: 92,                       // 最大ダイヤ番号
-  diaJsonUrl: "https://raw.githubusercontent.com/silvaoo/shukkin-search/main/dia-a.json"
-};
-// ==================== ここまで ====================
 
 <script>
 /* =====================================================
    出退勤検索くん - ダイヤ表データ
    ※このデータは実機で動作確認済みの正確なデータです
    ===================================================== */
-let DB={};   // 中身は dia-a.json から入れる（下の loadDiaData で読み込む）
+let DB={};   // 中身は dia-yobi.json から入れる（下の loadDiaData で読み込む）
 
 /* 手入れ（研修）ダイヤの特記事項 */
 const TEIIRE={28:'手入れダイヤ',64:'手入れダイヤ 掃除付き',76:'午後手入れ 掃除付き'};
 
 /* 2026・2027年の祝日一覧（国立天文台「暦要項」で確認済み） */
-let HOLIDAYS=new Set();   // 中身は dia-a.json から入れる
+let HOLIDAYS=new Set();   // 中身は dia-yobi.json から入れる
 
 
 /* ==== ダイヤのデータを読み込む ====
-   勤務データ・祝日・お盆・基準日は dia-a.json にまとめてある。
+   勤務データ・祝日・お盆・基準日は dia-yobi.json にまとめてある。
    ダイヤ改正のときは、この JSON だけを差し替えればよい。
 
    読み込みに失敗するとアプリが使えないので、
    通信できないときのために、いったん端末に控えておく。 */
-const DIA_JSON = './dia-a.json';
-const DIA_CACHE_KEY = 'a-dia-cache';
+const DIA_JSON = './dia-yobi.json';
+const DIA_CACHE_KEY = 'yobi-dia-cache';
 
 function applyDiaData(d){
   DB = d.dials || {};
@@ -1425,7 +1394,7 @@ async function loadDiaData(){
 const DW=['日','月','火','水','木','金','土'];
 
 /* ダイヤ番号「初期値」計算にのみ使う基準日・基準ダイヤ */
-let BASE_DATE=new Date();   // 中身は dia-a.json から入れる
+let BASE_DATE=new Date();   // 中身は dia-yobi.json から入れる
 let BASE_DIAL=1;
 
 /* 日付をYYYY-MM-DD形式の文字列に変換する */
@@ -1446,7 +1415,7 @@ function addMonths(date,n){
 function isHol(d){return HOLIDAYS.has(toISO(d));}
 
 /* お盆期間（土曜日ダイヤ扱いになる日）*/
-let OBON_DAYS=new Set();   // 中身は dia-a.json から入れる
+let OBON_DAYS=new Set();   // 中身は dia-yobi.json から入れる
 function isObon(d){return OBON_DAYS.has(toISO(d));}
 
 /* 日付の種別（平日／土曜／日祝）を判定する（お盆期間は土曜日ダイヤ扱い） */
@@ -1457,7 +1426,7 @@ function dayType(d){const w=d.getDay();if(isObon(d))return '土';if(w===0||isHol
 function calcDial(target,todayDial){
   const today=new Date();today.setHours(0,0,0,0);
   const diff=Math.round((target-today)/86400000);
-  return ((todayDial-1+diff)%92+92)%92+1;
+  return ((todayDial-1+diff)%25+25)%25+1;
 }
 
 /* 分割勤務の労働時間文字列（例:'3:01/6:25'）を合計時間（数値・h）に変換する */
@@ -1545,9 +1514,9 @@ function getShiftType(o){
 function updateTodayPreview(){
   const v=parseInt(document.getElementById('todayInput').value);
   const box=document.getElementById('todayPreviewBox');
-  if(!v||v<1||v>92){
+  if(!v||v<1||v>25){
     box.classList.add('empty'); // ヒント文章の間は枠を消す
-    box.innerHTML='↑ 1〜92の番号を入力してください';
+    box.innerHTML='↑ 1〜25の番号を入力してください';
     return;
   }
   box.classList.remove('empty'); // 実際のシフト内容を表示する時は枠を戻す
@@ -1581,7 +1550,7 @@ function updateTodayPreview(){
 /* ==== 今日の勤務を読み上げ ==== */
 function handleSpeakToday(){
   const v=parseInt(document.getElementById('todayInput').value);
-  if(!v||v<1||v>92){speakText('ダイヤ番号を入力してください','speakTodayBtn');return;}
+  if(!v||v<1||v>25){speakText('ダイヤ番号を入力してください','speakTodayBtn');return;}
   const today=new Date();
   const m=today.getMonth()+1,d=today.getDate();
   const dw=DW[today.getDay()];
@@ -1708,11 +1677,11 @@ window.addEventListener('pagehide',stopSpeakIfNeeded);
    ・日付メモ  : その日1日だけに紐づくメモ（例: 年休申請済み）
    ・ダイヤメモ: そのダイヤ番号すべてに紐づくメモ（例: 2番は朝の道が混む）
    保存先はこの端末のブラウザ内(localStorage)のみ。同僚には共有されない。 */
-const MEMO_DATE_KEY='a-memos-date';
-const MEMO_DIAL_KEY='a-memos-dial';
+const MEMO_DATE_KEY='yobi-memos-date';
+const MEMO_DIAL_KEY='yobi-memos-dial';
 /* メモに貼る画像（長辺800px・画質60%に縮小して端末内に保存） */
-const MEMOIMG_DATE_KEY='a-memoimgs-date';
-const MEMOIMG_DIAL_KEY='a-memoimgs-dial';
+const MEMOIMG_DATE_KEY='yobi-memoimgs-date';
+const MEMOIMG_DIAL_KEY='yobi-memoimgs-dial';
 function loadImgs(key){ try{ return JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){ return {}; } }
 function saveImgs(key,obj){
   try{ localStorage.setItem(key,JSON.stringify(obj)); return true; }
@@ -1837,8 +1806,8 @@ async function addMemoListImages(type,key,input){
   input.value='';
 }
 
-const SAVED_CAL_KEY='a-saved-cals';
-const SAVED_CAL_SEQ_KEY='a-saved-cals-seq';
+const SAVED_CAL_KEY='yobi-saved-cals';
+const SAVED_CAL_SEQ_KEY='yobi-saved-cals-seq';
 
 /* メモ本文をそのままHTMLに埋め込むと崩れる/危険なので必ずエスケープする */
 function escapeHtml(s){
@@ -1963,7 +1932,7 @@ function updateCountdown(){
   const el=document.getElementById('todayCountdown');
   if(!el)return;
   const v=parseInt(document.getElementById('todayInput').value);
-  const pairs=(v>=1&&v<=92)?todayShiftPairs(v):null;
+  const pairs=(v>=1&&v<=25)?todayShiftPairs(v):null;
   if(!pairs){el.style.display='none';return;}
   const n=new Date();
   const nowMin=n.getHours()*60+n.getMinutes();
@@ -2012,19 +1981,12 @@ function updateClock(){
 /* ==== オフライン対応 (Service Worker) ====
    一度オンラインで開けば、以降は圏外・機内モードでも起動できる。
    新しい版を公開した時は「更新があります」バナーで知らせる。 */
-/* ==== 通知のテスト（試験中） ====
-   出勤時刻の自動通知を作る前に、この端末で通知そのものが出せるかを確かめる。
-   ここで確認したいのは2点。
-     ① 通知の許可が取れるか
-     ② アプリを閉じた状態でも通知が届くか
-   ②はAndroidでは届き、iPhoneでは届かない見込み。その差を実際に見るためのテスト。 */
-
 /* ==== 出勤通知の設定画面 ====
    利用者がやることは「受け取るかどうか」と「何分前か」の2つだけ。
    トークンなどの専門的な話は一切表に出さない。 */
 
-const NOTIFY_ON_KEY   = 'a-notify-on';    // 通知を受け取るかどうか
-const NOTIFY_LEAD_KEY = 'a-notify-lead';  // 何分前に知らせるか
+const NOTIFY_ON_KEY   = 'yobi-notify-on';    // 通知を受け取るかどうか
+const NOTIFY_LEAD_KEY = 'yobi-notify-lead';  // 何分前に知らせるか
 
 /* 指定した日の、指定したダイヤ番号の「出勤時刻」を取り出す。
    公休・要確認・時刻が読み取れないものは null を返す。 */
@@ -2041,7 +2003,7 @@ const NOTIFY_LEAD_KEY = 'a-notify-lead';  // 何分前に知らせるか
    登録がサーバーから消えていても、アプリ側は「受け取る設定」のままなので、
    本人は気づかないまま通知が来なくなる。実際にそれが起きた。
    毎日入れ直しておけば、消えていても設定がずれていても自動で戻る。 */
-const NOTIFY_SYNC_KEY = 'a-notify-synced';
+const NOTIFY_SYNC_KEY = 'yobi-notify-synced';
 
 /* ==== 通知設定をサーバーに預ける ====
    端末に保存するだけでは、送信する側（GitHub Actions）が設定を知る手段がない。
@@ -2053,8 +2015,8 @@ const NOTIFY_SYNC_KEY = 'a-notify-synced';
 
 const FS_BASE = 'https://firestore.googleapis.com/v1/projects/shukkin-notify'
               + '/databases/(default)/documents/notifyTargets';
-const CLIENTID_KEY = 'a-client-id';
-const APP_CODE = 'a';
+const CLIENTID_KEY = 'yobi-client-id';
+const APP_CODE = 'yobi';
 
 /* この端末を表す番号。初回に作って以後ずっと使い回す。
    これがあるので、設定を変えても登録が増え続けない。 */
@@ -2090,7 +2052,7 @@ const FIREBASE_CONFIG = {
 // ウェブプッシュ証明書の公開鍵。Firebaseの画面で生成したもの
 const VAPID_KEY = "BNe_fplsGawcGvD4hXnlMrjhkTrP75zIP2n4X2-oLgv683whyD_dzqG023WzURV4B1mtnmmfI_Dlg6jGihjukR0";
 // 取得したトークンをこの端末に覚えておくための保存先
-const PUSHTOKEN_KEY = 'a-push-token';
+const PUSHTOKEN_KEY = 'yobi-push-token';
 
 /* 以前、置き場所を指定せずに登録してしまった通知用ワーカーを片付ける。
    本体と同じ区画に居座っていると、更新の帯が出続ける原因になる。 */
@@ -2348,7 +2310,7 @@ function hissSound(){
 }
 /* =====================================================
    お知らせバナー
-   一覧は全アプリ共通の news.json(${APP_CONFIG.routeName}のリポジトリに1つだけ置いてある)を読む。
+   一覧は全アプリ共通の news.json(学園前Aのリポジトリに1つだけ置いてある)を読む。
    急告を出す時は news.json に1行足すだけで、5アプリすべてに反映される。
    画像そのものはGoogleドライブの共有フォルダに置いたものを表示する。
    ===================================================== */
@@ -2497,7 +2459,7 @@ function exportCalendarICS(rows){
   rows.forEach(r=>{
     const slot=r.slot;
     // 公休の日も番号入りで終日予定として登録する(このダイヤ番号は公休=DBに勤務が無い)
-    if((!slot || !slot.o) && r.dn>=1 && r.dn<=92){
+    if((!slot || !slot.o) && r.dn>=1 && r.dn<=25){
       const d0=new Date(r.iso+'T00:00:00'), d1=new Date(r.iso+'T00:00:00'); d1.setDate(d1.getDate()+1);
       const p=n=>String(n).padStart(2,'0');
       const ymd=(d)=>`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;
@@ -2863,7 +2825,7 @@ let _selEnd=null;       // 選択した終了日(YYYY-MM-DD)
 
 function openCal(){
   const dial=parseInt(document.getElementById('todayInput').value);
-  if(!dial||dial<1||dial>92){showToast('先に今日のダイヤ番号を入力してください');return;}
+  if(!dial||dial<1||dial>25){showToast('先に今日のダイヤ番号を入力してください');return;}
   const t=new Date();t.setHours(0,0,0,0);
   // デフォルトは今日
   if(!_selStart){ _selStart=toISO(t); _selEnd=toISO(t); }
@@ -2954,7 +2916,7 @@ function applyCal(){
   const to=new Date(_selEnd+'T00:00:00');
   if((to-from)/86400000>120){showToast('検索は最大120日間までです');return;}
   const dial=parseInt(document.getElementById('todayInput').value);
-  if(!dial||dial<1||dial>92){showToast('今日のダイヤ番号を入力してください');return;}
+  if(!dial||dial<1||dial>25){showToast('今日のダイヤ番号を入力してください');return;}
 
   document.getElementById('dateFrom').value=_selStart;
   document.getElementById('dateTo').value=_selEnd;
@@ -3039,11 +3001,11 @@ function autoScrollResults(){
 /* ==== 自分のダイヤ番号を保存して、毎日自動で進める ====
    一度入力すれば、翌日以降は開くだけで「今日の番号」に自動更新される。
    保存先はこの端末の中だけなので、同僚の番号と混ざることはない。 */
-const MYDIAL_KEY='a-my-dial';
+const MYDIAL_KEY='yobi-my-dial';
 
 function saveMyDial(){
   const v=parseInt(document.getElementById('todayInput').value);
-  if(!v||v<1||v>92)return;
+  if(!v||v<1||v>25)return;
   try{
     localStorage.setItem(MYDIAL_KEY, JSON.stringify({dial:v, iso:toISO(new Date())}));
   }catch(e){}
@@ -3057,7 +3019,7 @@ function restoreMyDial(){
   const t=new Date(); t.setHours(0,0,0,0);
   const base=new Date(o.iso+'T00:00:00');
   const diff=Math.round((t-base)/86400000);
-  const d=((o.dial-1+diff)%92+92)%92+1;   // 1日ごとに1つ進む(1〜10を繰り返す)
+  const d=((o.dial-1+diff)%25+25)%25+1;   // 1日ごとに1つ進む(1〜10を繰り返す)
   const el=document.getElementById('todayInput');
   el.value=d;
   try{ localStorage.setItem(MYDIAL_KEY, JSON.stringify({dial:d, iso:toISO(t)})); }catch(e){}
@@ -3244,7 +3206,7 @@ function buildAndRender(dial,from,to){
 }
 function quickSearch(type){
   const dial=parseInt(document.getElementById('todayInput').value);
-  if(!dial||dial<1||dial>92){showToast('今日のダイヤ番号を入力してください');return;}
+  if(!dial||dial<1||dial>25){showToast('今日のダイヤ番号を入力してください');return;}
   feedbackQuick(); // クイック検索用のフィードバック
   const t=new Date();t.setHours(0,0,0,0);
   let from,to;
@@ -3267,7 +3229,7 @@ let _lastPeriodDays=null;
 /* 表示中の期間を、同じ幅だけ後ろに伸ばして検索し直す */
 function continueSearch(){
   const dial=parseInt(document.getElementById('todayInput').value);
-  if(!dial||dial<1||dial>92){showToast('今日のダイヤ番号を入力してください');return;}
+  if(!dial||dial<1||dial>25){showToast('今日のダイヤ番号を入力してください');return;}
   const s=document.getElementById('dateFrom').value, e=document.getElementById('dateTo').value;
   if(!s||!e){showToast('先に検索してください');return;}
   const sd=new Date(s+'T00:00:00'), ed=new Date(e+'T00:00:00');
@@ -3316,8 +3278,8 @@ function toggleMode(){document.body.classList.toggle('light');}
 
 /* ==== アプリ共有: ページ遷移せずその場で共有シートを呼び出す ==== */
 async function shareApp(){
-  const shareUrl='https://silvaoo.github.io/shukkin-search/';
-  const shareText='${APP_CONFIG.shortTitle}(出退勤検索くん) 北大和・${APP_CONFIG.routeName}ダイヤ';
+  const shareUrl='https://silvaoo.github.io/shukkin-search-yobi/';
+  const shareText='予(出退勤検索くん) 予備ダイヤ';
   if(navigator.share){
     try{ await navigator.share({title:shareText,text:shareText,url:shareUrl}); }catch(e){}
   }else{
@@ -3392,8 +3354,8 @@ function drawFw(){
 /* 元データ画像モーダルの開閉 */
 function openSourceModal(){
   document.getElementById('sourceModal').classList.add('active');
-  const sc = document.getElementById('srcScroll');
-  if(sc){ sc.scrollTop = 0; sc.scrollLeft = 0; }   // 開くたび先頭から
+  var sc=document.getElementById('srcScroll');
+  if(sc){ sc.scrollTop=0; sc.scrollLeft=0; }
 }
 function closeSourceModal(){
   document.getElementById('sourceModal').classList.remove('active');
@@ -3406,7 +3368,7 @@ window.onload=async function(){
   // 注意: このツールは同僚とも共有するため、特定の個人のダイヤ番号を
   // 「値」として自動入力してはいけない。あくまで「プレースホルダー(薄いヒント)」
   // として見せるだけにし、実際の値は各自が必ず自分で入力する形にする。
-  const autoDialNum=((BASE_DIAL-1+Math.floor((new Date()-BASE_DATE)/86400000))%92+92)%92+1;
+  const autoDialNum=((BASE_DIAL-1+Math.floor((new Date()-BASE_DATE)/86400000))%25+25)%25+1;
   document.getElementById('todayInput').placeholder=autoDialNum;
   restoreMyDial();   // 前に入れた番号があれば、今日の番号に進めて自動で入れる
   document.getElementById('todayInput').addEventListener('input',()=>{ updateTodayPreview(); saveMyDial(); });
