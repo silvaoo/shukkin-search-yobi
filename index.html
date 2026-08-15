@@ -91,6 +91,32 @@ body {
   cursor: pointer; font-size: 15px; text-decoration: none; display: inline-block;
 }
 
+/* ==== 通知の受け取りをすすめる帯 ====
+   まだ許可していない人にだけ、画面の上に細く出す。
+   許可が済んだら消えるので、普段は見えない。 */
+#push-bar{
+  display: none;
+  width: 100%; padding: 11px 14px;
+  background: linear-gradient(90deg, rgba(0,245,255,0.14), rgba(191,0,255,0.14));
+  border: none; border-bottom: 1px solid var(--border);
+  color: var(--cyan); font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; text-align: center;
+}
+#push-bar .x{
+  float: right; color: var(--dim); font-weight: 400;
+  padding: 0 2px 0 10px; font-size: 15px; line-height: 1;
+}
+
+/* ==== 通知の受け取りボタン(フッター) ==== */
+.push-btn{
+  background: var(--bg-card2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 16px; font-size: 12px; font-weight: 700; cursor: pointer;
+  font-family: inherit;
+}
+.push-btn.on{ color: var(--green); border-color: var(--green); }
+.push-note{ font-size: 11px; color: var(--dim); margin-top: 6px; line-height: 1.7; }
+
 /* ==== 今日のダイヤ入力カード ==== */
 .today-card {
   background: var(--bg-card);
@@ -895,6 +921,9 @@ a.source-link:visited {
 
 <button id="update-banner" onclick="handleUpdateClick()" style="display:none;">🔄 新しいバージョンがあります。タップで更新</button>
 
+<!-- 通知を受け取っていない人にだけ出す帯。許可すると消える -->
+<div id="push-bar" onclick="pushBarTap(event)">🔔 通知を受け取る<span class="x" onclick="pushBarClose(event)">✕</span></div>
+
 
 <canvas id="fw"></canvas>
 <div class="toast" id="toast"></div>
@@ -1022,6 +1051,7 @@ a.source-link:visited {
   <div>出退勤時間に誤りがあっても当方は責任を負いかねます。</div>
   <div style="margin-top:8px;"><span class="source-link" onclick="openMemoList()">📝 保存したメモの一覧</span></div>
   <div style="margin-top:8px;"><span class="source-link" onclick="openGuide()">📖 使い方・アプリの入れ方・更新履歴</span></div>
+  <div id="pushBox" style="margin-top:12px;"></div>
   <div class="credit" style="margin-top:10px;">by AIタケタニ</div>
 </div>
 
@@ -2074,16 +2104,72 @@ async function cleanupWrongPushWorker(){
   }catch(e){ /* 片付けに失敗しても、登録自体は続行する */ }
 }
 
+/* ==== お知らせ通知の受け取り ====
+   仕組みは3段階。
+     1. 端末の宛先(トークン)をFirebaseに発行してもらう
+     2. その宛先を、どのダイヤのアプリかを添えてサーバーに預ける
+     3. 送信側(管理ページ)が、ダイヤを指定して一斉に送る
+
+   預けるのは「宛先・ダイヤ記号・端末を表す番号」の3つだけ。
+   名前も社員番号もダイヤ番号も送らないので、誰のものかは分からない。
+
+   ホーム画面に追加していない場合は登録しない。
+   ブラウザのタブで開いているだけの状態では通知が届かない端末が多く、
+   届かない宛先を残すと送信時に無駄な失敗が積み上がるため。 */
+
+const PUSH_FS_URL = 'https://firestore.googleapis.com/v1/projects/shukkin-notify'
+                  + '/databases/(default)/documents/pushTokens';
+const PUSH_ON_KEY   = 'yobi-push-on';      // 受け取る設定にしているか
+const PUSH_ASK_KEY  = 'yobi-push-asked';   // どの版のときに案内を出したか
+const PUSH_BAR_KEY  = 'yobi-push-bar';     // どの版のときに帯を閉じたか
+/* 案内を出し分けるための版。sw.js の版と合わせて上げる。
+   これが変わると「更新された」とみなして、もう一度だけ案内を出す。 */
+const APP_VERSION   = 'v65';
+const PUSH_SYNC_KEY = 'yobi-push-synced';  // 最後に預け直した日
+
+/* 宛先をサーバーに預ける（すでにあれば上書き） */
+async function savePushToken(token){
+  const cid = getClientId();
+  if(!cid || !token) return false;
+  const url = PUSH_FS_URL + '/' + encodeURIComponent(cid)
+            + '?key=' + FIREBASE_CONFIG.apiKey;
+  try{
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          token:     { stringValue: token },
+          app:       { stringValue: APP_CODE },
+          updatedAt: { stringValue: new Date().toISOString() }
+        }
+      })
+    });
+    return res.ok;
+  }catch(e){ return false; }
+}
+
+/* 預けた宛先を取り消す（受け取らない設定にしたとき） */
+async function deletePushToken(){
+  const cid = getClientId();
+  if(!cid) return false;
+  const url = PUSH_FS_URL + '/' + encodeURIComponent(cid)
+            + '?key=' + FIREBASE_CONFIG.apiKey;
+  try{
+    const res = await fetch(url, { method: 'DELETE' });
+    return res.ok;
+  }catch(e){ return false; }
+}
+
 async function setupPush(){
   // 通知に対応していない端末・ブラウザをはじく
   if(!('Notification' in window) || !('serviceWorker' in navigator)){
     showToast('この端末は通知に対応していません');
     return false;
   }
-  // iPhoneはホーム画面に追加していないと通知を受け取れない
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if(isIOS && !isStandaloneApp()){
-    showToast('iPhoneは「ホーム画面に追加」してから開いてください');
+  // ホーム画面に追加していない場合は登録しない
+  if(!isStandaloneApp()){
+    showToast('「ホーム画面に追加」してから開いてください');
     return false;
   }
   // Firebaseの読み込みに失敗している場合(オフラインなど)
@@ -2109,11 +2195,8 @@ async function setupPush(){
   try{
     showToast('準備しています…');
     // 通知専用のService Workerを登録する(検索機能用の sw.js とは別物)
-    // 【置き場所を分けるのが重要】
-    // 場所を指定せずに登録すると、本体の sw.js と同じ区画に入ってしまい、
-    // 互いを上書きし合う。その結果「新しいバージョンがあります」の帯が
-    // 何度も出たり、通知が正しく表示されなくなる。
-    // 通知用は専用の区画に置いて、本体と衝突しないようにする。
+    // 場所を指定せずに登録すると本体の sw.js と同じ区画に入り、互いを
+    // 上書きし合って更新バナーが出続ける。専用の区画に置いて衝突を避ける。
     await cleanupWrongPushWorker();
     const swReg = await navigator.serviceWorker.register(
       'firebase-messaging-sw.js',
@@ -2127,19 +2210,29 @@ async function setupPush(){
       vapidKey: VAPID_KEY,
       serviceWorkerRegistration: swReg
     });
-    if(!token){ showToast('トークンを取得できませんでした'); return false; }
+    if(!token){ showToast('宛先を取得できませんでした'); return false; }
 
     try{ localStorage.setItem(PUSHTOKEN_KEY, token); }catch(e){}
 
+    // 宛先を預ける。ここまで済んで初めて通知が届くようになる
+    if(!await savePushToken(token)){
+      showToast('登録できませんでした。時間をおいて試してください');
+      return false;
+    }
+    try{
+      localStorage.setItem(PUSH_ON_KEY, '1');
+      localStorage.setItem(PUSH_SYNC_KEY, toISO(new Date()));
+    }catch(e){}
+
     // アプリを開いたまま通知が届いた場合の処理
     messaging.onMessage(function(payload){
-      const d = (payload && payload.data) || {};
-      showToast(d.title || 'お知らせが届きました');
+      const d = (payload && payload.data) || (payload && payload.notification) || {};
+      showToast(d.title || '通知が届きました');
     });
 
-    // トークンは画面に出さない。利用者には意味が分からず、混乱のもとになるため。
-    // 端末の中には保存してあるので、必要なときに取り出せる。
-
+    showToast('✅ 通知を受け取れるようになりました');
+    renderPushBox();
+    renderPushBar();   // 受け取る設定になったので帯を消す
     return true;
 
   }catch(e){
@@ -2149,6 +2242,162 @@ async function setupPush(){
   }
 }
 
+/* ==== 通知の受け取りを尋ねる案内 ====
+   ホーム画面に追加した人にだけ、更新のたびに一度出す。
+   「あとで」を押したらその版ではもう出さない。次の更新でまた出る。
+   すでに受け取る設定にしている人には出さない。
+
+   いきなり端末の許可を求めない理由:
+   一度「ブロック」を押されると、アプリ側からは二度と尋ねられなくなる。
+   先にこの案内をはさむことで、誤ってブロックされるのを防いでいる。 */
+/* ※ 以下のポップアップは今は使っていない。
+      上部の帯だけにしたため呼び出していないが、
+      戻したくなったときのために残してある。 */
+function shouldAskPush(){
+  if(!('Notification' in window) || !('serviceWorker' in navigator)) return false;
+  if(!isStandaloneApp()) return false;              // ホーム画面から開いた人だけ
+  if(Notification.permission === 'denied') return false;  // すでに断られている
+  try{
+    if(localStorage.getItem(PUSH_ON_KEY) === '1') return false;   // もう受け取っている
+    if(localStorage.getItem(PUSH_ASK_KEY) === APP_VERSION) return false; // この版では尋ねた
+  }catch(e){ return false; }
+  return true;
+}
+
+function openPushAsk(){
+  const el = document.getElementById('pushAsk');
+  if(el) el.classList.add('active');
+}
+function closePushAsk(){
+  const el = document.getElementById('pushAsk');
+  if(el) el.classList.remove('active');
+}
+
+/* 「あとで」を押したとき。この版ではもう出さない */
+function pushAskLater(){
+  try{ localStorage.setItem(PUSH_ASK_KEY, APP_VERSION); }catch(e){}
+  closePushAsk();
+}
+
+/* 「受け取る」を押したとき。ここで初めて端末に許可を求める */
+async function pushAskYes(){
+  try{ localStorage.setItem(PUSH_ASK_KEY, APP_VERSION); }catch(e){}
+  closePushAsk();
+  await setupPush();
+}
+
+/* ==== 上部の帯 ====
+   まだ通知を受け取っていない人にだけ出す。
+   押すと受け取りの確認へ。✕ を押すとその版では出さない。 */
+function renderPushBar(){
+  const bar = document.getElementById('push-bar');
+  if(!bar) return;
+  bar.style.display = shouldShowPushBar() ? 'block' : 'none';
+}
+
+function shouldShowPushBar(){
+  if(!('Notification' in window) || !('serviceWorker' in navigator)) return false;
+  if(!isStandaloneApp()) return false;                     // ホーム画面から開いた人だけ
+  if(Notification.permission === 'denied') return false;   // すでに断られている
+  try{
+    if(localStorage.getItem(PUSH_ON_KEY) === '1') return false;          // もう受け取っている
+    if(localStorage.getItem(PUSH_BAR_KEY) === APP_VERSION) return false; // この版では閉じた
+  }catch(e){ return false; }
+  return true;
+}
+
+/* 帯そのものを押したとき */
+function pushBarTap(ev){
+  if(ev && ev.target && ev.target.classList.contains('x')) return; // ✕は別処理
+  setupPush();
+}
+
+/* ✕ を押したとき。この版ではもう出さない */
+function pushBarClose(ev){
+  if(ev){ ev.stopPropagation(); }
+  try{ localStorage.setItem(PUSH_BAR_KEY, APP_VERSION); }catch(e){}
+  const bar = document.getElementById('push-bar');
+  if(bar) bar.style.display = 'none';
+}
+
+/* 受け取りをやめる */
+async function stopPush(){
+  if(!confirm('通知を受け取らないようにしますか？')) return;
+  await deletePushToken();
+  try{
+    localStorage.removeItem(PUSH_ON_KEY);
+    localStorage.removeItem(PUSH_SYNC_KEY);
+  }catch(e){}
+  showToast('通知を止めました');
+  renderPushBox();
+  renderPushBar();   // 受け取らない設定に戻ったので帯を出す
+}
+
+/* フッターの表示を作る。
+   ホーム画面に追加していない場合は、ボタンではなく案内を出す。 */
+function renderPushBox(){
+  const box = document.getElementById('pushBox');
+  if(!box) return;
+
+  if(!('Notification' in window) || !('serviceWorker' in navigator)){
+    box.innerHTML = '';
+    return;
+  }
+  if(!isStandaloneApp()){
+    box.innerHTML = '<div class="push-note">🔔 ホーム画面に追加すると、'
+                  + 'このアプリからの通知を受け取れます</div>';
+    return;
+  }
+
+  let on = false;
+  try{ on = localStorage.getItem(PUSH_ON_KEY) === '1'; }catch(e){}
+
+  if(on){
+    box.innerHTML = '<button class="push-btn on" onclick="stopPush()">🔔 通知を受け取る設定です</button>'
+                  + '<div class="push-note">押すと通知を止められます</div>';
+  }else{
+    box.innerHTML = '<button class="push-btn" onclick="setupPush()">🔕 通知を受け取る</button>'
+                  + '<div class="push-note">このアプリからの通知が届きます</div>';
+  }
+}
+
+/* アプリを開いたとき、1日1回だけ宛先を預け直す。
+   宛先はFirebase側の都合で作り直されることがあり、
+   古いままだと本人が気づかないうちに通知が届かなくなるため。 */
+async function resyncPushToken(){
+  let on = false, last = '';
+  try{
+    on   = localStorage.getItem(PUSH_ON_KEY) === '1';
+    last = localStorage.getItem(PUSH_SYNC_KEY) || '';
+  }catch(e){}
+  if(!on) return;
+  if(!isStandaloneApp()) return;
+  const today = toISO(new Date());
+  if(last === today) return;                    // 今日はもう済んでいる
+  if(Notification.permission !== 'granted') return;
+  if(typeof firebase === 'undefined' || !firebase.messaging) return;
+
+  try{
+    const swReg = await navigator.serviceWorker.register(
+      'firebase-messaging-sw.js',
+      { scope: './firebase-cloud-messaging-push-scope' }
+    );
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const token = await firebase.messaging().getToken({
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: swReg
+    });
+    if(token && await savePushToken(token)){
+      try{
+        localStorage.setItem(PUSHTOKEN_KEY, token);
+        localStorage.setItem(PUSH_SYNC_KEY, today);
+      }catch(e){}
+    }
+  }catch(e){ /* 失敗しても次に開いたときに試す */ }
+}
+
+/* 発行されたトークンを画面に出す。試験中のみの表示。
+   長い文字列なので、コピー用のボタンを付けておく。 */
 /* 発行されたトークンを画面に出す。試験中のみの表示。
    長い文字列なので、コピー用のボタンを付けておく。 */
 function showPushToken(token){
@@ -3368,6 +3617,9 @@ function closeSourceModal(){
 window.onload=async function(){
   await loadDiaData();   // 先にダイヤのデータを読み込む
   initSW(); // オフライン対応を開始
+  renderPushBox();   // フッターの通知ボタンを表示
+  renderPushBar();   // 通知を受け取っていない人にだけ、上に帯を出す
+  resyncPushToken(); // 受け取る設定なら、宛先を1日1回預け直す
   updateClock(); setInterval(updateClock,1000); // 時計を開始
   // 注意: このツールは同僚とも共有するため、特定の個人のダイヤ番号を
   // 「値」として自動入力してはいけない。あくまで「プレースホルダー(薄いヒント)」
