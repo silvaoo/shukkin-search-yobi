@@ -716,13 +716,16 @@ input[type="date"] {
   margin-top: 14px;
   line-height: 1.8;
 }
-.source-link {
+.source-link,
+a.source-link:link,
+a.source-link:visited {
   color: var(--cyan);
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
 }
 .source-modal {
+  overscroll-behavior: contain;   /* モーダル内の引っ張りで画面が再読み込みされるのを防ぐ */
   display: none;
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -741,6 +744,7 @@ input[type="date"] {
   margin: 0 auto;
 }
 .source-img-scroll {
+  overscroll-behavior: contain;   /* 画像スクロール中のプルリフレッシュ防止 */
   flex: 1;
   min-height: 0;
   overflow: auto;
@@ -3354,8 +3358,8 @@ function drawFw(){
 /* 元データ画像モーダルの開閉 */
 function openSourceModal(){
   document.getElementById('sourceModal').classList.add('active');
-  var sc=document.getElementById('srcScroll');
-  if(sc){ sc.scrollTop=0; sc.scrollLeft=0; }
+  const sc = document.getElementById('srcScroll');
+  if(sc){ sc.scrollTop = 0; sc.scrollLeft = 0; }   // 開くたび先頭から
 }
 function closeSourceModal(){
   document.getElementById('sourceModal').classList.remove('active');
