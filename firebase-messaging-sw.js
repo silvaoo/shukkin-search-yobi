@@ -57,19 +57,33 @@ const APP_HOME = new URL('./', self.location.href).href;
 
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
+  // 探す前に、まず開く指示を出す。
+  // Androidでは、いったん探す処理をはさむと
+  // 利用者の操作から離れたとみなされ、開けなくなるため。
+  const opening = (clients && clients.openWindow)
+    ? clients.openWindow(APP_HOME)
+    : Promise.resolve(null);
+
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
-      // すでに開いていれば、それを前に出す。
-      // 他のダイヤのアプリを前に出してしまわないよう、住所で見分ける。
-      for (const c of list) {
-        if (c.url && c.url.indexOf(APP_HOME) === 0 && 'focus' in c) return c.focus();
-      }
-      if (clients.openWindow) return clients.openWindow(APP_HOME);
+    opening.catch(function () {
+      // 開けなかったときだけ、すでに開いている画面を前に出す
+      return clients.matchAll({ type: 'window', includeUncontrolled: true })
+        .then(function (list) {
+          for (const c of list) {
+            if (c.url && c.url.indexOf(APP_HOME) === 0 && 'focus' in c) return c.focus();
+          }
+        });
     })
   );
 });
 
-/* ここでは skipWaiting() や clients.claim() を呼ばない。
+/* 新しい版を入れたら、すぐ入れ替わるようにする。
+   呼ばないと古い版が居座り、直したはずの動きが反映されない。 */
+self.addEventListener('install', function () {
+  self.skipWaiting();
+});
+
+/* clients.claim() は呼ばない。
    呼ぶと、この通知用ワーカーがページの制御を奪ってしまい、
    本体側が「新しい版が来た」と誤って判断して更新バナーが出続ける。
    通知を受け取るだけなら、ページの制御を持つ必要はない。 */
