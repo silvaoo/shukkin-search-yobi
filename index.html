@@ -92,6 +92,37 @@ body {
   cursor: pointer; font-size: 15px; text-decoration: none; display: inline-block;
 }
 
+/* ==== 通知の受け取りを尋ねる案内 ==== */
+.push-ask-back {
+  display: none; position: fixed; inset: 0; z-index: 10050;
+  background: rgba(0,0,0,0.75); padding: 20px;
+  align-items: center; justify-content: center;
+}
+.push-ask-back.active { display: flex; }
+.push-ask {
+  background: var(--bg-card); border: 1px solid var(--cyan);
+  border-radius: 16px; padding: 22px 18px; max-width: 340px; width: 100%;
+  text-align: center;
+}
+.push-ask h3 {
+  font-size: 16px; color: var(--cyan); margin-bottom: 10px; font-weight: 800;
+}
+.push-ask p {
+  font-size: 13px; color: var(--text); line-height: 1.8; margin-bottom: 18px;
+}
+.push-ask .row { display: flex; gap: 10px; }
+.push-ask button {
+  flex: 1; padding: 13px; border-radius: 10px; font-size: 14px;
+  font-weight: 800; cursor: pointer; font-family: inherit;
+}
+.push-ask .yes {
+  background: var(--cyan); color: #1a0e2e; border: none;
+}
+.push-ask .later {
+  background: var(--bg-card2); color: var(--dim);
+  border: 1px solid var(--border);
+}
+
 /* ==== 通知の受け取りをすすめる帯 ====
    まだ許可していない人にだけ、画面の上に細く出す。
    許可が済んだら消えるので、普段は見えない。 */
@@ -204,7 +235,7 @@ body {
 #news-banner {
   position: relative; width: 100%; margin: 0 0 12px; padding: 13px 40px 13px 14px;
   border: none; border-radius: 14px; cursor: pointer; text-align: center;
-  background: linear-gradient(135deg, #bf00ff, #ff0080);
+  background: linear-gradient(135deg, var(--purple), var(--pink));
   color: #fff; font-size: 14px; font-weight: 800; letter-spacing: 0.5px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4); transform-origin: center;
   /* 最初だけ元気に脈打ち、その後はゆっくり呼吸する(更新バナーと同じ考え方) */
@@ -233,7 +264,7 @@ body {
   display: block; width: 100%; height: auto; margin: 0 0 12px;
   border-radius: 10px; background: rgba(255,255,255,0.05);
 }
-#newsModal .news-loading { text-align: center; padding: 18px; font-size: 13px; opacity: 0.7; }
+#newsModal .news-loading { text-align: center; padding: 18px; font-size: 13px; color: var(--dim); }
 /* ヘッダーのダイヤ名だけテーマ色にして、アプリを見分けやすくする(サイズは据え置き) */
 .dia-name { color: var(--orange); font-weight: 800; font-size: 16px; }
 .dia-name-line { text-align: center; margin: 0 0 14px; }
@@ -410,7 +441,6 @@ body {
   width: 100%; margin-top: 14px; padding: 13px; border: none; border-radius: 10px;
   background: #1a1a2e; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer;
 }
-
 
 /* ==== メモ一覧（保存したメモをまとめて見る・直す） ==== */
 
@@ -849,6 +879,13 @@ a.source-link:visited {
   color: #333;
 }
 .source-close:active { background: #ddd; }
+.source-pdf-link {
+  text-align: center;
+  color: #fff;
+  font-size: 13px;
+  margin-top: 10px;
+}
+.source-pdf-link a { color: #7ec8ff; font-weight: 700; }
 .footer .credit { color: var(--green); font-weight: 700; margin-top: 4px; }
 
 /* ==== 花火・トースト ==== */
@@ -964,10 +1001,22 @@ a.source-link:visited {
 <canvas id="fw"></canvas>
 <div class="toast" id="toast"></div>
 
+<!-- 通知の受け取りを尋ねる案内。ホーム画面に追加した人にだけ、更新のたびに一度出す -->
+<div class="push-ask-back" id="pushAsk">
+  <div class="push-ask">
+    <h3>🔔 通知</h3>
+    <p>このアプリからの通知を<br>受け取りますか？</p>
+    <div class="row">
+      <button class="later" onclick="pushAskLater()">あとで</button>
+      <button class="yes" onclick="pushAskYes()">受け取る</button>
+    </div>
+  </div>
+</div>
+
 <div class="header">
   <a href="#" class="share-btn" onclick="shareApp(); return false;" aria-label="アプリを共有">📤</a>
   <h1><img class="mascot-icon" src="mascot.png" alt="出退勤検索くん">出退勤検索くん</h1>
-  <p>2026年3月14日改正 ／ 1〜25番</p>
+  <p>2026年3月14日改正 ／ 1〜92番</p>
   <button class="mode-btn" onclick="toggleMode()">🌙/☀️</button>
 </div>
 
@@ -987,7 +1036,7 @@ a.source-link:visited {
     <input type="number" id="todayInput" min="1" max="25" inputmode="numeric" autocomplete="off">
     <span>番ダイヤ</span>
   </div>
-  <div class="today-preview empty" id="todayPreviewBox">↑ 1〜25の番号を入力してください</div>
+  <div class="today-preview empty" id="todayPreviewBox">↑ 1〜92の番号を入力してください</div>
   <div class="today-countdown" id="todayCountdown" style="display:none;"></div>
   <div class="mydial-note" id="myDialNote" style="display:none;">
     ✅ この番号を保存し、明日から自動で1つずつ進みます。
@@ -1298,94 +1347,7 @@ a.source-link:visited {
 
     <!-- ===== 更新履歴 ===== -->
     <div class="guide-pane" id="paneLog">
-      <div class="log-item">
-        <div class="log-date">2026/08/11</div>
-        <div class="log-body"><span class="tag tag-fix">修正</span>読み上げを止めたときに、エラーの文字が出ることがあったのを直しました。読み上げ中はボタンが「読み上げを停止」に変わります。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/08/08</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>大事なお知らせがあるとき、検索画面の下に「お知らせがあります」のバナーが出るようにしました。タップすると内容を見られます。右上の×で閉じられます。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/08/08</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>今日のダイヤ番号を入れると、出勤・退勤までの残り時間が出るようにしました。出勤1時間前になると色が変わってお知らせします。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/08/08</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>期間を検索したとき、その期間の合計労働時間を結果の下に出すようにしました。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/26</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>画面をいちばん上で下に引っ張ると、最新の状態に更新できるようにしました。ホーム画面のアイコンから開いた時も使えます。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/26</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>出退勤検索くんに、マスコットキャラクターとして奈良鹿ケンサクくんが登場しました！ケンサクくんが皆さんの出退勤をいつも見守ってくれてます。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/25</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>メモに画像を貼れるようにしました。日付のメモ・ダイヤ番号のメモの両方に、写真を何枚でも貼れます。貼った画像はメモ一覧やカレンダーからも見られ、タップすると大きく表示されます。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/20</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>検索結果のカレンダーを「保存したカレンダー」としてメモ一覧に保存できるようにしました。さらに、そこから勤務をスマホのカレンダーアプリに一括登録できるようにしました（出勤1時間前のお知らせ付き）。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/20</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>検索結果を「私のカレンダー」として保存できるようにしました。カレンダーの日付を大きく見やすくし、土日祝も色分けしました。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/20</div>
-        <div class="log-body"><span class="tag tag-up">改善</span>アプリ全体のレイアウトを少し変更。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/18</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>「📱 入れ方」タブを追加。iPhone・Androidそれぞれの、ホーム画面へのアイコンの入れ方を載せました。LINEで受け取った人もこれを見れば入れられます。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/18</div>
-        <div class="log-body"><span class="tag tag-up">改善</span>使い方を「まずはこの3つだけ」の形に整理し、文章を短くしました。「きほん」と「もっと便利に」に分けたので、必要なところだけ読めます。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/17</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>「📝 保存したメモの一覧」を追加。これまでに書いたメモを一覧で確認でき、その場で編集・削除もできます。過ぎた日のメモはまとめて片付けられます。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/17</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>検索結果を「📅 カレンダーで見る」を追加。1ヶ月分のダイヤ番号と出退勤時間が一目で分かります。マスをタップすると大きく表示され、分割勤務の詳しい時間も読めます。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/17</div>
-        <div class="log-body"><span class="tag tag-up">改善</span>カレンダーを白ベースの見やすい配色にし、文字とマスを大きくしました。クイック検索の後も自動で結果まで移動します。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/16</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>ダイヤ番号を保存するようにしました。一度入れれば、翌日からは自動で1つ進んだ番号が入るので毎回の入力が不要になります。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/16</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>「指定して検索」を追加。カレンダーで1回目のタップ＝開始日、2回目のタップ＝終了日を選ぶだけで、その期間をまとめて検索できます。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/16</div>
-        <div class="log-body"><span class="tag tag-up">改善</span>アプリを見分けやすくするため、ヘッダーのダイヤ名を色分け表示にしました。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/15</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>オフライン対応。一度開けば圏外でも起動できるようになりました。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/15</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>本日の日付と時刻(24時間表示・秒あり)を表示するようにしました。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/15</div>
-        <div class="log-body"><span class="tag tag-new">新機能</span>検索結果にメモ機能を追加(日付ごと・ダイヤ番号ごと、編集・保存・削除)。</div>
-      </div>
-      <div class="log-item">
-        <div class="log-date">2026/07/14</div>
-        <div class="log-body"><span class="tag tag-new">新規</span>予備ダイヤ版を公開しました(1〜25番／2026年3月14日改正)。</div>
-      </div>
+      <div class="log-loading">読み込み中…</div>
     </div>
   </div>
 </div>
@@ -1404,14 +1366,18 @@ a.source-link:visited {
 
 <div id="sourceModal" class="source-modal" onclick="closeSourceModal()">
   <div class="source-modal-content" onclick="event.stopPropagation()">
-    <a class="source-pdf-btn" href="kinmu-keitou-yobi.pdf" target="_blank" rel="noopener">
-      📄 勤務系統表（全5ページ）を開く
-      <span>系統・行先・中間解放まで載った詳しい表です</span>
+    <!-- PDFは pdf/ に固定名で置く。無ければ自動で隠れる（ダイヤ改正時は上書きするだけ） -->
+    <a class="source-pdf-btn" id="pdfShift" href="pdf/shift-table.pdf" target="_blank" rel="noopener" style="display:none;">
+      📄 出退勤表（PDF版）を開く
+      <span>拡大したい時はこちら。共有→Adobe Readerで開くと好きなだけ大きくできます</span>
     </a>
-    <div class="source-img-scroll" id="srcScroll">
-      <img id="srcImg" src="images/genpage-1.jpg" alt="予備ダイヤ 出退勤表">
-    </div>
-    <div class="source-zoom-hint">🔍 指を広げて拡大／狭めて縮小。とじるには下の「とじる」ボタン（戻らない時はページを再読み込み）</div>
+    <a class="source-pdf-btn" id="pdfKeitou" href="pdf/kinmu-keitou.pdf" target="_blank" rel="noopener" style="display:none;">
+      📄 勤務系統表を開く
+      <span>系統・行先・中間解放まで載った詳しい表です。拡大しても文字がきれいです</span>
+    </a>
+    <!-- 出退勤表の画像は images/genpage-1.jpg から順に。枚数はアプリごとに違う -->
+    <div class="source-img-scroll" id="srcScroll"></div>
+    <div class="source-zoom-hint">🔍 指を広げて拡大／狭めて縮小。とじるには下の「とじる」ボタン</div>
     <button class="source-close" onclick="closeSourceModal()">×&nbsp;とじる</button>
   </div>
 </div>
@@ -1601,7 +1567,7 @@ function updateTodayPreview(){
   const box=document.getElementById('todayPreviewBox');
   if(!v||v<1||v>25){
     box.classList.add('empty'); // ヒント文章の間は枠を消す
-    box.innerHTML='↑ 1〜25の番号を入力してください';
+    box.innerHTML='↑ 1〜92の番号を入力してください';
     return;
   }
   box.classList.remove('empty'); // 実際のシフト内容を表示する時は枠を戻す
@@ -2066,6 +2032,13 @@ function updateClock(){
 /* ==== オフライン対応 (Service Worker) ====
    一度オンラインで開けば、以降は圏外・機内モードでも起動できる。
    新しい版を公開した時は「更新があります」バナーで知らせる。 */
+/* ==== 通知のテスト（試験中） ====
+   出勤時刻の自動通知を作る前に、この端末で通知そのものが出せるかを確かめる。
+   ここで確認したいのは2点。
+     ① 通知の許可が取れるか
+     ② アプリを閉じた状態でも通知が届くか
+   ②はAndroidでは届き、iPhoneでは届かない見込み。その差を実際に見るためのテスト。 */
+
 /* ==== 出勤通知の設定画面 ====
    利用者がやることは「受け取るかどうか」と「何分前か」の2つだけ。
    トークンなどの専門的な話は一切表に出さない。 */
@@ -2176,7 +2149,7 @@ const PUSH_BAR_KEY  = 'yobi-push-bar';     // どの版のときに帯を閉じ�
 const PUSH_FAIL_KEY = 'yobi-push-fail';    // 預け直しに続けて失敗した回数
 /* 案内を出し分けるための版。sw.js の版と合わせて上げる。
    これが変わると「更新された」とみなして、もう一度だけ案内を出す。 */
-const APP_VERSION   = 'v86';
+const APP_VERSION   = 'v91';
 const PUSH_SYNC_KEY = 'yobi-push-synced';  // 最後に預け直した日
 
 /* 宛先をサーバーに預ける（すでにあれば上書き） */
@@ -2398,7 +2371,7 @@ async function stopPush(){
 /* 版と端末の様子をフッターに出す。
    「通知が来ない」と言われたときに、入れ方や許可の状態を
    その場で確かめられるようにするため。 */
-const APP_LABEL = 'バージョン 2.32';
+const APP_LABEL = 'バージョン 2.33';
 
 function renderAppInfo(){
   const box = document.getElementById('appInfo');
@@ -2448,6 +2421,9 @@ function renderPushBox(){
   }
 }
 
+/* アプリを開いたとき、1日1回だけ宛先を預け直す。
+   宛先はFirebase側の都合で作り直されることがあり、
+   古いままだと本人が気づかないうちに通知が届かなくなるため。 */
 /* アプリを開くたびに、宛先が変わっていないか確かめて預け直す。
 
    【1日1回では足りなかった】
@@ -2536,8 +2512,6 @@ async function cleanupStaleWorkers(){
   }catch(e){ /* 片付けに失敗しても動作には影響しない */ }
 }
 
-/* 発行されたトークンを画面に出す。試験中のみの表示。
-   長い文字列なので、コピー用のボタンを付けておく。 */
 /* 発行されたトークンを画面に出す。試験中のみの表示。
    長い文字列なので、コピー用のボタンを付けておく。 */
 function showPushToken(token){
@@ -3105,6 +3079,7 @@ function closeGuide(){
   document.body.style.overflow='';
 }
 function switchGuide(which){
+  if(which==='log') loadChangeLog();   // 履歴は開いた時に読み込む
   // 使い方 / 入れ方 / 更新履歴 の3タブを切り替える
   const map = { use:['paneUse','tabUse'], inst:['paneInst','tabInst'], log:['paneLog','tabLog'] };
   for (const k in map){
@@ -3710,6 +3685,54 @@ async function shareApp(){
   }
 }
 
+/* ==== 更新履歴 ====
+   履歴は logs.html に分けてある。masterを触らずにアプリごとへ追記できる。
+   ファイルが無いときは、その旨だけ出して黙って閉じる。 */
+function loadChangeLog(){
+  const box=document.getElementById('paneLog');
+  if(!box || box._loaded) return;
+  box._loaded=true;
+  fetch('logs.html',{cache:'no-cache'}).then(function(r){
+    if(!r.ok) throw new Error('なし');
+    return r.text();
+  }).then(function(html){
+    box.innerHTML=html;
+  }).catch(function(){
+    box.innerHTML='<div class="log-loading">更新履歴はまだありません。</div>';
+  });
+}
+
+/* ==== 出退勤表の画像とPDF ====
+   画像は images/genpage-1.jpg から順に。枚数は 1 枚（アプリごとに違う）。
+   PDFは pdf/ に固定名で置く決まり。実際に有る時だけボタンを出すので、
+   ダイヤ改正のときは同じ名前で上書きするだけでよい。 */
+const SRC_PAGES = 1;
+function buildSourceImages(){
+  const box=document.getElementById('srcScroll');
+  if(!box || box._built) return;
+  box._built=true;
+  let html='';
+  for(let i=1;i<=SRC_PAGES;i++){
+    html += '<img class="src-page" id="srcImg'+i+'" src="images/genpage-'+i+'.jpg"'
+          + ' alt="予備ダイヤ 出退勤表 '+i+'枚目">';
+  }
+  box.innerHTML=html;
+  // 1枚目だけは従来どおり srcImg でも掴めるようにしておく
+  const first=document.getElementById('srcImg1');
+  if(first) first.id='srcImg';
+}
+/* PDFが実在するか確かめて、有る時だけボタンを見せる */
+function showPdfIfExists(id, url){
+  fetch(url,{method:'HEAD'}).then(function(r){
+    if(r.ok){ const el=document.getElementById(id); if(el) el.style.display='block'; }
+  }).catch(function(){});
+}
+function initSourceView(){
+  buildSourceImages();
+  showPdfIfExists('pdfShift','pdf/shift-table.pdf');
+  showPdfIfExists('pdfKeitou','pdf/kinmu-keitou.pdf');
+}
+
 /* ==== 花火アニメーション（公休の日があったときのお楽しみ） ==== */
 const fwc=document.getElementById('fw');
 const fwx=fwc.getContext('2d');
@@ -3773,6 +3796,7 @@ function drawFw(){
 /* ==== 初期化 ==== */
 /* 元データ画像モーダルの開閉 */
 function openSourceModal(){
+  initSourceView();   // 画像を並べ、PDFが有ればボタンを出す
   document.getElementById('sourceModal').classList.add('active');
   const sc = document.getElementById('srcScroll');
   if(sc){ sc.scrollTop = 0; sc.scrollLeft = 0; }   // 開くたび先頭から
@@ -3784,9 +3808,9 @@ function closeSourceModal(){
 window.onload=async function(){
   await loadDiaData();   // 先にダイヤのデータを読み込む
   initSW(); // オフライン対応を開始
-  renderPushBox();   // フッターの通知ボタンを表示
+  renderPushBox();      // フッターの通知ボタンを表示
   renderAppInfo();      // 版と端末の様子をフッターに出す
-  renderPushBar();   // 通知を受け取っていない人にだけ、上に帯を出す
+  renderPushBar();      // 通知を受け取っていない人にだけ、上に帯を出す
   cleanupStaleWorkers();// 使われなくなった古い登録を片付ける
   resyncPushToken();    // 宛先が変わっていたら預け直す
   updateClock(); setInterval(updateClock,1000); // 時計を開始
